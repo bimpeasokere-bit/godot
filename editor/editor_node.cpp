@@ -9381,6 +9381,7 @@ EditorNode::EditorNode() {
 	editor_dock_manager->add_dock(ImportDock::get_singleton());
 
 	FileSystemDock *filesystem_dock = memnew(FileSystemDock);
+	filesystem_dock->set_default_slot(EditorDock::DOCK_SLOT_BOTTOM);
 	filesystem_dock->connect("inherit", callable_mp(this, &EditorNode::_inherit_request));
 	filesystem_dock->connect("instantiate", callable_mp(this, &EditorNode::_instantiate_request));
 	filesystem_dock->connect("display_mode_changed", callable_mp(this, &EditorNode::_save_editor_layout));
