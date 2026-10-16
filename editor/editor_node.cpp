@@ -9286,17 +9286,17 @@ EditorNode::EditorNode() {
 	project_title->set_visible(can_expand && menu_type == MENU_TYPE_GLOBAL);
 	left_spacer->add_child(project_title);
 
-	// Spacer to center 2D / 3D / Script buttons.
-	right_spacer = memnew(Control);
-	right_spacer->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
-	right_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	title_bar->add_child(right_spacer);
-
 	project_run_bar = memnew(EditorRunBar);
 	project_run_bar->set_mouse_filter(Control::MOUSE_FILTER_STOP);
 	title_bar->add_child(project_run_bar);
 	project_run_bar->connect("play_pressed", callable_mp(this, &EditorNode::_project_run_started));
 	project_run_bar->connect("stop_pressed", callable_mp(this, &EditorNode::_project_run_stopped));
+
+	// Spacer to center 2D / 3D / Script buttons.
+	right_spacer = memnew(Control);
+	right_spacer->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
+	right_spacer->set_h_size_flags(Control::SIZE_EXPAND_FILL);
+	title_bar->add_child(right_spacer);
 
 	right_menu_hb = memnew(HBoxContainer);
 	right_menu_hb->set_mouse_filter(Control::MOUSE_FILTER_STOP);
@@ -9388,7 +9388,8 @@ EditorNode::EditorNode() {
 	get_project_settings()->connect_filesystem_dock_signals(filesystem_dock);
 	editor_dock_manager->add_dock(filesystem_dock);
 
-	memnew(InspectorDock(editor_data));
+	InspectorDock *inspector_dock = memnew(InspectorDock(editor_data));
+	inspector_dock->set_default_slot(EditorDock::DOCK_SLOT_RIGHT_UR);
 	editor_dock_manager->add_dock(InspectorDock::get_singleton());
 
 	memnew(SignalsDock);
