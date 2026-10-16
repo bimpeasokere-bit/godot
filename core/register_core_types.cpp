@@ -359,10 +359,25 @@ void register_core_types() {
 
 void register_core_settings() {
 	// Since in register core types, globals may not be present.
-	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/tcp/connect_timeout_seconds", PROPERTY_HINT_RANGE, "1,1800,1"), (30));
-	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/unix/connect_timeout_seconds", PROPERTY_HINT_RANGE, "1,1800,1"), (30));
-	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "network/limits/packet_peer_stream/max_buffer_po2", PROPERTY_HINT_RANGE, "8,64,1,or_greater"), (16));
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/tcp/connect_timeout_seconds", PROPERTY_HINT_RANGE, "1,1800,1"), (15));
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/unix/connect_timeout_seconds", PROPERTY_HINT_RANGE, "1,1800,1"), (15));
+	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "network/limits/packet_peer_stream/max_buffer_po2", PROPERTY_HINT_RANGE, "8,64,1,or_greater"), (20));
 	GLOBAL_DEF(PropertyInfo(Variant::STRING, "network/tls/certificate_bundle_override", PROPERTY_HINT_FILE, "*.crt"), "");
+
+	// Forge Engine Multiplayer Optimizations
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/max_packet_size", PROPERTY_HINT_RANGE, "1024,65536,1"), 32768);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/max_channels_per_peer", PROPERTY_HINT_RANGE, "1,1024,1"), 32);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/max_out_buffer_po2", PROPERTY_HINT_RANGE, "8,32,1"), 20);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/limits/max_in_buffer_po2", PROPERTY_HINT_RANGE, "8,32,1"), 20);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/replication/compression_threshold", PROPERTY_HINT_RANGE, "0,1000000,1"), 512);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/replication/max_sync_count", PROPERTY_HINT_RANGE, "1,256,1"), 64);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/replication/max_sync_queue_size", PROPERTY_HINT_RANGE, "1,1024,1"), 128);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/replication/default_sync_mode", PROPERTY_HINT_ENUM, "Inherit,If Owner,Always,Never"), 1);
+	GLOBAL_DEF(PropertyInfo(Variant::FLOAT, "network/replication/replication_rate", PROPERTY_HINT_RANGE, "0.01,10.0,0.01"), 0.05);
+	GLOBAL_DEF(PropertyInfo(Variant::FLOAT, "network/replication/physics_replication_rate", PROPERTY_HINT_RANGE, "0.01,10.0,0.01"), 0.02);
+	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/replication/max_delta_packets", PROPERTY_HINT_RANGE, "1,32,1"), 8);
+	GLOBAL_DEF(PropertyInfo(Variant::BOOL, "network/replication/compress_replication", true);
+	GLOBAL_DEF(PropertyInfo(Variant::BOOL, "network/replication/always_replicate_as_master", false);
 
 	GLOBAL_DEF("threading/worker_pool/max_threads", -1);
 	GLOBAL_DEF("threading/worker_pool/low_priority_thread_ratio", 0.3);

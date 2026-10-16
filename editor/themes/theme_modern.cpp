@@ -58,6 +58,13 @@ void ThemeModern::populate_shared_styles(const Ref<EditorTheme> &p_theme, Editor
 		p_theme->set_color("base_color", EditorStringName(Editor), p_config.base_color);
 		p_theme->set_color("accent_color", EditorStringName(Editor), p_config.accent_color);
 
+		// Forge Engine Onyx Dark: Special working panel color for Viewport/Inspector
+		Color working_panel_color = p_config.base_color;
+		if (p_config.preset == "Onyx Dark") {
+			working_panel_color = Color(0.094, 0.094, 0.094); // #181818 - Dark Charcoal Grey
+		}
+		p_theme->set_color("working_panel_color", EditorStringName(Editor), working_panel_color);
+
 		// White (dark theme) or black (light theme), will be used to generate the rest of the colors
 		p_config.mono_color = p_config.dark_theme ? Color(1, 1, 1) : Color(0, 0, 0);
 		p_config.mono_color_font = p_config.dark_icon_and_font ? Color(1, 1, 1) : Color(0, 0, 0);
@@ -1710,6 +1717,10 @@ void ThemeModern::populate_editor_styles(const Ref<EditorTheme> &p_theme, Editor
 			// This is displayed as an overlay of the 3D scene, whose appearance doesn't change with the editor theme.
 			// On top of that, dark overlays are more readable than light overlays.
 			bg_color.invert();
+		}
+		// Forge Engine Onyx Dark: Use working panel color for viewport
+		if (p_config.preset == "Onyx Dark") {
+			bg_color = p_theme->get_color("working_panel_color", EditorStringName(Editor));
 		}
 		style_info_3d_viewport->set_bg_color(bg_color);
 		style_info_3d_viewport->set_content_margin_individual(EDSCALE_RND(p_config.base_margin * 2), EDSCALE_RND(p_config.base_margin * 1.5), EDSCALE_RND(p_config.base_margin * 2), EDSCALE_RND(p_config.base_margin * 1.5));

@@ -349,6 +349,13 @@ EditorThemeManager::ThemeConfiguration EditorThemeManager::_create_theme_config(
 				preset_base_color = Color(0.9, 0.9, 0.9);
 				preset_contrast = light_contrast;
 				preset_icon_saturation = 1;
+			} else if (config.preset == "Onyx Dark") {
+				// Forge Engine Custom Theme
+				preset_accent_color = Color(0.0, 0.898, 1.0); // #00E5FF - Cyber Cyan
+				preset_base_color = Color(0.067, 0.067, 0.067); // #111111 - Deep Pitch Black
+				preset_contrast = 0.08;
+				preset_draw_extra_borders = false;
+				preset_icon_saturation = 1.1;
 			} else if (config.preset == "Solarized (Dark)") {
 				preset_accent_color = Color(0.15, 0.55, 0.82);
 				preset_base_color = Color(0.03, 0.21, 0.26);

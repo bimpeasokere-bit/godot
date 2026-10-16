@@ -2137,6 +2137,10 @@ void ThemeClassic::populate_editor_styles(const Ref<EditorTheme> &p_theme, Edito
 	{
 		// Panel.
 		Ref<StyleBoxFlat> editor_inspector_panel = p_config.tree_panel_style->duplicate();
+		// Forge Engine Onyx Dark: Use working panel color for inspector
+		if (p_config.preset == "Onyx Dark") {
+			editor_inspector_panel->set_bg_color(p_theme->get_color("working_panel_color", EditorStringName(Editor)));
+		}
 		editor_inspector_panel->set_border_width_all(0);
 		editor_inspector_panel->set_content_margin_all(0);
 		p_theme->set_stylebox(SceneStringName(panel), "EditorInspector", editor_inspector_panel);
