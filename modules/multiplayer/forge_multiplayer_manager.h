@@ -43,6 +43,9 @@ public:
 		CONNECTION_MODE_CLIENT
 	};
 
+protected:
+	static void _bind_methods();
+
 private:
 	Ref<MultiplayerAPI> multiplayer_api;
 	Ref<MultiplayerPeer> multiplayer_peer;
@@ -88,3 +91,5 @@ public:
 	void _on_connection_failed();
 	void _on_connected_to_server();
 };
+
+VARIANT_ENUM_CAST(ForgeMultiplayerManager::ConnectionMode);

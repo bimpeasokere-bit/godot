@@ -67,6 +67,7 @@ private:
 
 public:
 	virtual String get_plugin_name() const override { return "Debugger"; }
+	void set_run_debug_collisions_enabled(bool p_enabled);
 
 	DebuggerEditorPlugin(PopupMenu *p_menu);
 	~DebuggerEditorPlugin();

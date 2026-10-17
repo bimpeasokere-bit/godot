@@ -376,8 +376,9 @@ void register_core_settings() {
 	GLOBAL_DEF(PropertyInfo(Variant::FLOAT, "network/replication/replication_rate", PROPERTY_HINT_RANGE, "0.01,10.0,0.01"), 0.05);
 	GLOBAL_DEF(PropertyInfo(Variant::FLOAT, "network/replication/physics_replication_rate", PROPERTY_HINT_RANGE, "0.01,10.0,0.01"), 0.02);
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "network/replication/max_delta_packets", PROPERTY_HINT_RANGE, "1,32,1"), 8);
-	GLOBAL_DEF(PropertyInfo(Variant::BOOL, "network/replication/compress_replication", true);
-	GLOBAL_DEF(PropertyInfo(Variant::BOOL, "network/replication/always_replicate_as_master", false);
+	GLOBAL_DEF("network/replication/compress_replication", true);
+	GLOBAL_DEF("network/replication/always_replicate_as_master", false);
+
 
 	GLOBAL_DEF("threading/worker_pool/max_threads", -1);
 	GLOBAL_DEF("threading/worker_pool/low_priority_thread_ratio", 0.3);

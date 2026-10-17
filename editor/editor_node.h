@@ -265,6 +265,12 @@ private:
 
 	static EditorNode *singleton;
 
+	enum WorkflowProfile {
+		WORKFLOW_PROFILE_GAME,
+		WORKFLOW_PROFILE_FILM,
+	};
+	WorkflowProfile workflow_profile = WORKFLOW_PROFILE_GAME;
+
 	EditorData editor_data;
 	EditorFolding editor_folding;
 	EditorSelectionHistory editor_history;
@@ -357,6 +363,7 @@ private:
 	PopupMenu *project_menu = nullptr;
 	PopupMenu *debug_menu = nullptr;
 	PopupMenu *settings_menu = nullptr;
+	PopupMenu *workflow_profiles = nullptr;
 	PopupMenu *help_menu = nullptr;
 	PopupMenu *tool_menu = nullptr;
 	PopupMenu *export_as_menu = nullptr;
@@ -387,6 +394,7 @@ private:
 	Node *_last_instantiated_scene = nullptr;
 
 	ConfirmationDialog *confirmation = nullptr;
+	ConfirmationDialog *workflow_profile_dialog = nullptr;
 	bool stop_project_confirmation = false;
 	bool stop_download_confirmation = false;
 	Button *confirmation_button = nullptr;
@@ -693,6 +701,10 @@ private:
 
 	void _update_layouts_menu();
 	void _layout_menu_option(int p_id);
+	void _update_workflow_profiles_menu();
+	void _workflow_profile_option(int p_id);
+	void _workflow_profile_dialog_action(const String &p_action);
+	void _apply_workflow_profile(WorkflowProfile p_profile, bool p_reset_game_layout);
 
 	void _update_addon_config();
 

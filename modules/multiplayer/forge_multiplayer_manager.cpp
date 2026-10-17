@@ -29,8 +29,9 @@
 
 #include "forge_multiplayer_manager.h"
 
-#include "core/io/ip.h"
-#include "core/os/os.h"
+#include "core/object/callable_mp.h"
+#include "core/object/class_db.h"
+#include "modules/enet/enet_multiplayer_peer.h"
 #include "scene/main/scene_tree.h"
 
 void ForgeMultiplayerManager::_ready() {

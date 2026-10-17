@@ -6,6 +6,9 @@ Import("env_modules")
 
 env_mp = env_modules.Clone()
 
+if env["builtin_enet"]:
+    env_mp.Prepend(CPPPATH=["#thirdparty/enet"])
+
 module_obj = []
 env_mp.add_source_files(module_obj, "*.cpp")
 

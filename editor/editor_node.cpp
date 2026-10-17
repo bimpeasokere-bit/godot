@@ -59,6 +59,7 @@
 #include "editor/debugger/script_editor_debugger.h"
 #include "editor/doc/editor_help.h"
 #include "editor/docks/editor_dock_manager.h"
+#include "editor/docks/dock_tab_container.h"
 #include "editor/docks/filesystem_dock.h"
 #include "editor/docks/groups_dock.h"
 #include "editor/docks/history_dock.h"
@@ -1574,6 +1575,11 @@ void EditorNode::_sources_changed(bool p_exist) {
 		RenderingServer::get_singleton()->global_shader_parameters_load_settings(true);
 
 		_load_editor_layout();
+		const String saved_workflow_profile = EditorSettings::get_singleton()->get_project_metadata("editor", "workflow_profile", "");
+		const bool prompt_for_workflow_profile = saved_workflow_profile.is_empty();
+		workflow_profile = saved_workflow_profile == "film" ? WORKFLOW_PROFILE_FILM : WORKFLOW_PROFILE_GAME;
+		_apply_workflow_profile(workflow_profile, false);
+		_update_workflow_profiles_menu();
 
 		if (!defer_load_scene.is_empty()) {
 			OS::get_singleton()->benchmark_begin_measure("Editor", "Load Scene");
@@ -1583,6 +1589,9 @@ void EditorNode::_sources_changed(bool p_exist) {
 
 			OS::get_singleton()->benchmark_end_measure("Editor", "Load Scene");
 			OS::get_singleton()->benchmark_dump();
+		}
+		if (prompt_for_workflow_profile && !cmdline_mode) {
+			workflow_profile_dialog->popup_centered();
 		}
 
 		// Start preview thread now that it's safe.
@@ -6798,6 +6807,99 @@ void EditorNode::_update_layouts_menu() {
 	}
 }
 
+void EditorNode::_update_workflow_profiles_menu() {
+	if (!workflow_profiles) {
+		workflow_profiles = memnew(PopupMenu);
+		workflow_profiles->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_workflow_profile_option));
+	}
+
+	workflow_profiles->clear();
+	workflow_profiles->add_check_item(TTRC("Game Mode"), WORKFLOW_PROFILE_GAME);
+	workflow_profiles->set_item_checked(0, workflow_profile == WORKFLOW_PROFILE_GAME);
+	workflow_profiles->add_check_item(TTRC("Film/Movie Mode"), WORKFLOW_PROFILE_FILM);
+	workflow_profiles->set_item_checked(1, workflow_profile == WORKFLOW_PROFILE_FILM);
+}
+
+void EditorNode::_workflow_profile_option(int p_id) {
+	if (p_id != WORKFLOW_PROFILE_GAME && p_id != WORKFLOW_PROFILE_FILM) {
+		return;
+	}
+	_apply_workflow_profile((WorkflowProfile)p_id, true);
+	_update_workflow_profiles_menu();
+}
+
+void EditorNode::_workflow_profile_dialog_action(const String &p_action) {
+	if (p_action == "film") {
+		_workflow_profile_option(WORKFLOW_PROFILE_FILM);
+	} else {
+		_workflow_profile_option(WORKFLOW_PROFILE_GAME);
+	}
+}
+
+void EditorNode::_apply_workflow_profile(WorkflowProfile p_profile, bool p_reset_game_layout) {
+	workflow_profile = p_profile;
+	EditorSettings::get_singleton()->set_project_metadata("editor", "workflow_profile", p_profile == WORKFLOW_PROFILE_FILM ? "film" : "game");
+
+	if (p_profile == WORKFLOW_PROFILE_GAME) {
+		if (p_reset_game_layout) {
+			_layout_menu_option(LAYOUT_DEFAULT);
+		}
+		if (EditorDock *replication_dock = editor_dock_manager->get_dock_by_name("Replication")) {
+			editor_dock_manager->open_dock(replication_dock, false);
+		}
+		_save_editor_layout();
+		return;
+	}
+
+	// Move only the Animation dock, preserving the user's other dock placements.
+	Ref<ConfigFile> film_layout;
+	film_layout.instantiate();
+	editor_dock_manager->save_docks_to_config(film_layout, "docks");
+
+	const String animation_dock_name = "Animation";
+	const String bottom_dock_key = DockTabContainer::get_config_key(EditorDock::DOCK_SLOT_BOTTOM);
+	int animation_tab_index = 0;
+	for (int slot = EditorDock::DOCK_SLOT_NONE; slot < EditorDock::DOCK_SLOT_MAX; slot++) {
+		const String dock_key = DockTabContainer::get_config_key(slot);
+		if (!film_layout->has_section_key("docks", dock_key) && slot != EditorDock::DOCK_SLOT_BOTTOM) {
+			continue;
+		}
+		Vector<String> dock_names = String(film_layout->get_value("docks", dock_key, String())).split(",", false);
+		dock_names.erase(animation_dock_name);
+		if (slot == EditorDock::DOCK_SLOT_BOTTOM) {
+			animation_tab_index = dock_names.size();
+			dock_names.push_back(animation_dock_name);
+		}
+		film_layout->set_value("docks", dock_key, String(",").join(dock_names));
+	}
+
+	Array closed_docks = film_layout->get_value("docks", "dock_closed", Array());
+	closed_docks.erase(animation_dock_name);
+	film_layout->set_value("docks", "dock_closed", closed_docks);
+	Dictionary floating_docks = film_layout->get_value("docks", "dock_floating", Dictionary());
+	floating_docks.erase(animation_dock_name);
+	film_layout->set_value("docks", "dock_floating", floating_docks);
+	film_layout->set_value("docks", bottom_dock_key + "_selected_tab_idx", animation_tab_index);
+
+	editor_dock_manager->load_docks_from_config(film_layout, "docks");
+	if (EditorDock *animation_dock = editor_dock_manager->get_dock_by_name(animation_dock_name)) {
+		editor_dock_manager->focus_dock(animation_dock);
+	}
+	if (EditorDock *replication_dock = editor_dock_manager->get_dock_by_name("Replication")) {
+		editor_dock_manager->close_dock(replication_dock);
+	}
+
+	EditorSettings::get_singleton()->set_project_metadata("debug_options", "autostart_network_profiler", false);
+	EditorSettings::get_singleton()->set_project_metadata("debug_options", "run_debug_collisions", false);
+	for (EditorPlugin *editor_plugin : editor_plugins) {
+		if (DebuggerEditorPlugin *debugger_plugin = Object::cast_to<DebuggerEditorPlugin>(editor_plugin)) {
+			debugger_plugin->set_run_debug_collisions_enabled(false);
+			break;
+		}
+	}
+	_save_editor_layout();
+}
+
 void EditorNode::_layout_menu_option(int p_id) {
 	switch (p_id) {
 		case LAYOUT_SAVE: {
@@ -8263,6 +8365,8 @@ void EditorNode::_build_settings_menu(bool p_dark_mode) {
 	settings_menu->add_separator();
 
 	settings_menu->add_submenu_node_item(TTRC("Editor Docks"), editor_dock_manager->get_docks_menu());
+	_update_workflow_profiles_menu();
+	settings_menu->add_submenu_node_item(TTRC("Project Profile"), workflow_profiles);
 
 	if (!editor_layouts) {
 		editor_layouts = memnew(PopupMenu);
@@ -9432,6 +9536,15 @@ EditorNode::EditorNode() {
 	confirmation->connect(SceneStringName(confirmed), callable_mp(this, &EditorNode::_menu_confirm_current));
 	confirmation->connect("custom_action", callable_mp(this, &EditorNode::_discard_changes));
 	confirmation->connect("canceled", callable_mp(this, &EditorNode::_cancel_confirmation));
+
+	workflow_profile_dialog = memnew(ConfirmationDialog);
+	workflow_profile_dialog->set_title(TTRC("Project Profile"));
+	workflow_profile_dialog->set_text(TTRC("Choose a workflow profile for this project."));
+	workflow_profile_dialog->set_ok_button_text(TTRC("Game Mode"));
+	workflow_profile_dialog->add_button(TTRC("Film/Movie Mode"), false, "film");
+	gui_base->add_child(workflow_profile_dialog);
+	workflow_profile_dialog->connect(SceneStringName(confirmed), callable_mp(this, &EditorNode::_workflow_profile_option).bind(WORKFLOW_PROFILE_GAME));
+	workflow_profile_dialog->connect("custom_action", callable_mp(this, &EditorNode::_workflow_profile_dialog_action));
 
 	save_confirmation = memnew(ConfirmationDialog);
 	save_confirmation->add_button(TTRC("Don't Save"), DisplayServer::get_singleton()->get_swap_cancel_ok(), "discard");

@@ -215,6 +215,13 @@ void DebuggerEditorPlugin::_menu_option(int p_option) {
 	}
 }
 
+void DebuggerEditorPlugin::set_run_debug_collisions_enabled(bool p_enabled) {
+	const int item_index = debug_menu->get_item_index(RUN_DEBUG_COLLISIONS);
+	if (item_index >= 0 && debug_menu->is_item_checked(item_index) != p_enabled) {
+		_menu_option(RUN_DEBUG_COLLISIONS);
+	}
+}
+
 void DebuggerEditorPlugin::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
